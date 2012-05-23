@@ -2,6 +2,9 @@
 #define MEDIAPLAYERUI_H
 
 #include <QtGui>
+#include <Phonon/SeekSlider>
+#include <Phonon/MediaObject>
+#include <Phonon/AudioOutput>
 
 
 class MediaPlayerUI : public QMainWindow
@@ -28,7 +31,9 @@ private:
     // Local vars
     // Pieces
     QMenu *fileMenu;
-    QSlider *seekSlider;
+    Phonon::MediaObject *song;
+    Phonon::AudioOutput *audioOut;
+    Phonon::SeekSlider *seekSlider;
 
     // Actions
     QAction *openAction;
@@ -36,9 +41,6 @@ private:
     QAction *playAction;
     QAction *seekLeftAction;
     QAction *seekRightAction;
-
-    // Internal state
-    bool playing;
 };
 
 #endif

@@ -1,4 +1,7 @@
 #include <QtGui>
+#include <Phonon/SeekSlider>
+#include <Phonon/MediaObject>
+#include <Phonon/AudioOutput>
 #include <iostream>
 #include <cmath>
 
@@ -19,7 +22,7 @@ MediaPlayerUI::MediaPlayerUI()
 // Initialize internal state
 void MediaPlayerUI::initState()
 {
-    playing = false;
+    song = 0;
 }
 
 // Create actions
@@ -27,9 +30,7 @@ void MediaPlayerUI::initActions()
 {
     // Create actions
     openAction = new QAction(tr("&Open"), this);
-
     quitAction = new QAction(tr("&Quit"), this);
-
     playAction = new QAction(QPixmap("../resources/icons/playButton.png"), 0, this);
     seekLeftAction = new QAction(QPixmap("../resources/icons/seekLeft.png"), 0, this);
     seekRightAction = new QAction(QPixmap("../resources/icons/seekRight.png"), 0, this);
@@ -55,17 +56,16 @@ void MediaPlayerUI::initMenu()
 void MediaPlayerUI::initGUI()
 {
     // Song info
+    // XXX: Song choice later
+    song = new Phonon::MediaObject(this);
+    song->setCurrentSource(Phonon::MediaSource("../resources/music/pressure_cooker.mp3"));
+    audioOut = new Phonon::AudioOutput(Phonon::MusicCategory, this);
+    Phonon::Path path = Phonon::createPath(song, audioOut);
 
     // Slider for current song
-    seekSlider = new QSlider(Qt::Horizontal, this);
-    seekSlider->setMinimum(0);
-    seekSlider->setMaximum(100);
-    seekSlider->setTickInterval(1);
-    // XXX: Set the tick interval...
-    // XXX: Connect actions to song playback
+    seekSlider = new Phonon::SeekSlider(song, this);
 
     // Buttons
-    // XXX: Toggle from play to pause
     QToolBar *bar = new QToolBar;
     bar->addAction(seekLeftAction);
     bar->addAction(playAction);
@@ -101,23 +101,33 @@ void MediaPlayerUI::quit()
 
 void MediaPlayerUI::play()
 {
-    if (playing) {
-        playAction->setIcon(QPixmap("../resources/icons/playButton.png"));
-        playing = false;
-    } else {
-        playAction->setIcon(QPixmap("../resources/icons/pauseButton.png"));
-        playing = true;
+    if (song == 0) {
+        cerr << "ERR: Play error. No song loaded." << endl;
+        return;
+    }
+    switch (song->state()) {
+        case Phonon::PausedState:
+            playAction->setIcon(QPixmap("../resources/icons/playButton.png"));
+            song->play();
+            break;
+        case Phonon::StoppedState:
+            playAction->setIcon(QPixmap("../resources/icons/playButton.png"));
+            song->play();
+            break;
+        case Phonon::PlayingState:
+            playAction->setIcon(QPixmap("../resources/icons/pauseButton.png"));
+            song->pause();
+            break;
+        default:
+            cerr << "ERR: MediaObject state not handled." << endl;
+            break;
     }
 }
 
 void MediaPlayerUI::seekLeft()
 {
-    int cval = seekSlider->value();
-    seekSlider->setValue(max(seekSlider->minimum(), cval-1));
 }
 
 void MediaPlayerUI::seekRight()
 {
-    int cval = seekSlider->value();
-    seekSlider->setValue(min(seekSlider->maximum(), cval+1));
 }
