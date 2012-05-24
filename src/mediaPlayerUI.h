@@ -17,6 +17,8 @@ public:
 
 private slots:
     void open();
+    void importAll();
+    void metaQueueUpdate(Phonon::State, Phonon::State);
     void quit();
     void play();
     void seekLeft();
@@ -30,11 +32,18 @@ private:
     void initMenu();
     void initGUI();
 
-    // Local vars
+    QStringList getTableLabels();
+
+    // Visuals
     QMenu *fileMenu;
+    QTableWidget *tableWidget;
     QLabel *metaArtist;
     QLabel *metaTitle;
     QLabel *metaGenre;
+
+    // Data Handling
+    Phonon::MediaObject *metaLoader;
+    QStringList *metaQueue;
 
     // Sounds
     Phonon::MediaObject *song;
@@ -45,6 +54,7 @@ private:
 
     // Actions
     QAction *openAction;
+    QAction *importBulkAction;
     QAction *quitAction;
     QAction *playAction;
     QAction *seekLeftAction;
