@@ -5,6 +5,7 @@
 #include <Phonon/SeekSlider>
 #include <Phonon/MediaObject>
 #include <Phonon/AudioOutput>
+#include <Phonon/VolumeSlider>
 
 
 class MediaPlayerUI : public QMainWindow
@@ -20,6 +21,7 @@ private slots:
     void play();
     void seekLeft();
     void seekRight();
+    void populateMetaData();
 
 private:
     // Local funcs
@@ -29,11 +31,17 @@ private:
     void initGUI();
 
     // Local vars
-    // Pieces
     QMenu *fileMenu;
+    QLabel *metaArtist;
+    QLabel *metaTitle;
+    QLabel *metaGenre;
+
+    // Sounds
     Phonon::MediaObject *song;
     Phonon::AudioOutput *audioOut;
     Phonon::SeekSlider *seekSlider;
+    Phonon::VolumeSlider *volumeSlider;
+    QMultiMap<QString, QString> metaData;
 
     // Actions
     QAction *openAction;

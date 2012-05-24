@@ -2,6 +2,7 @@
 #include <Phonon/SeekSlider>
 #include <Phonon/MediaObject>
 #include <Phonon/AudioOutput>
+#include <Phonon/VolumeSlider>
 #include <iostream>
 #include <cmath>
 
@@ -62,8 +63,15 @@ void MediaPlayerUI::initGUI()
     audioOut = new Phonon::AudioOutput(Phonon::MusicCategory, this);
     Phonon::Path path = Phonon::createPath(song, audioOut);
 
-    // Slider for current song
+    // Meta data updating!
+    connect(song, SIGNAL(metaDataChanged()), this, SLOT(populateMetaData()));
+    metaArtist = new QLabel(this);
+    metaTitle = new QLabel(this);
+    metaGenre = new QLabel(this);
+
+    // Sliders
     seekSlider = new Phonon::SeekSlider(song, this);
+    volumeSlider = new Phonon::VolumeSlider(audioOut, this);
 
     // Buttons
     QToolBar *bar = new QToolBar;
@@ -72,13 +80,20 @@ void MediaPlayerUI::initGUI()
     bar->addAction(seekRightAction);
 
     // Layout
+    QHBoxLayout *textLayout = new QHBoxLayout;
+    textLayout->addWidget(metaArtist);
+    textLayout->addWidget(metaTitle);
+    textLayout->addWidget(metaGenre);
+
     QHBoxLayout *sliderLayout = new QHBoxLayout;
     sliderLayout->addWidget(seekSlider);
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     buttonLayout->addWidget(bar);
+    buttonLayout->addWidget(volumeSlider);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(textLayout);
     mainLayout->addLayout(sliderLayout);
     mainLayout->addLayout(buttonLayout);
 
@@ -86,6 +101,27 @@ void MediaPlayerUI::initGUI()
     centralWidget->setLayout(mainLayout);
 
     setCentralWidget(centralWidget);
+}
+
+void MediaPlayerUI::populateMetaData()
+{
+    if (song == 0) {
+        cerr << "ERR: No song to populate meta data with." << endl;
+        return;
+    }
+
+    QStringList artists = song->metaData("ARTIST");
+    if (artists.begin() != artists.end()) {
+        metaArtist->setText(*artists.begin());
+    }
+    QStringList titles = song->metaData("TITLE");
+    if (titles.begin() != titles.end()) {
+        metaTitle->setText(*titles.begin());
+    }
+    QStringList genres = song->metaData("GENRE");
+    if (genres.begin() != genres.end()) {
+        metaGenre->setText(*genres.begin());
+    }
 }
 
 // === SLOTS =============
