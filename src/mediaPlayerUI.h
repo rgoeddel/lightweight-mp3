@@ -7,6 +7,10 @@
 #include <Phonon/AudioOutput>
 #include <Phonon/VolumeSlider>
 
+enum MediaPlayerState
+{
+    WAITING, LOADING, PLAYING, PAUSED,
+};
 
 class MediaPlayerUI : public QMainWindow
 {
@@ -21,6 +25,9 @@ private slots:
     void metaQueueUpdate(Phonon::State, Phonon::State);
     void quit();
     void play();
+    void loadSong(int, int);
+    void songStateChanged(Phonon::State, Phonon::State);
+    void queueNextSong();
     void seekLeft();
     void seekRight();
     void populateMetaData();
@@ -59,6 +66,11 @@ private:
     QAction *playAction;
     QAction *seekLeftAction;
     QAction *seekRightAction;
+
+    // Internal State
+    MediaPlayerState state;
+    int songIdx;
+
 };
 
 #endif
