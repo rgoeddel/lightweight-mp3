@@ -2,7 +2,15 @@
 #define MEDIAPLAYERUI_H
 
 #include <QtGui>
+#include <Phonon/SeekSlider>
+#include <Phonon/MediaObject>
+#include <Phonon/AudioOutput>
+#include <Phonon/VolumeSlider>
 
+enum MediaPlayerState
+{
+    WAITING, LOADING, PLAYING, PAUSED,
+};
 
 class MediaPlayerUI : public QMainWindow
 {
@@ -13,10 +21,16 @@ public:
 
 private slots:
     void open();
+    void importAll();
+    void metaQueueUpdate(Phonon::State, Phonon::State);
     void quit();
     void play();
+    void loadSong(int, int);
+    void songStateChanged(Phonon::State, Phonon::State);
+    void queueNextSong();
     void seekLeft();
     void seekRight();
+    void populateMetaData();
 
 private:
     // Local funcs
@@ -25,20 +39,38 @@ private:
     void initMenu();
     void initGUI();
 
-    // Local vars
-    // Pieces
+    QStringList getTableLabels();
+
+    // Visuals
     QMenu *fileMenu;
-    QSlider *seekSlider;
+    QTableWidget *tableWidget;
+    QLabel *metaArtist;
+    QLabel *metaTitle;
+    QLabel *metaGenre;
+
+    // Data Handling
+    Phonon::MediaObject *metaLoader;
+    QStringList *metaQueue;
+
+    // Sounds
+    Phonon::MediaObject *song;
+    Phonon::AudioOutput *audioOut;
+    Phonon::SeekSlider *seekSlider;
+    Phonon::VolumeSlider *volumeSlider;
+    QMultiMap<QString, QString> metaData;
 
     // Actions
     QAction *openAction;
+    QAction *importBulkAction;
     QAction *quitAction;
     QAction *playAction;
     QAction *seekLeftAction;
     QAction *seekRightAction;
 
-    // Internal state
-    bool playing;
+    // Internal State
+    MediaPlayerState state;
+    int songIdx;
+
 };
 
 #endif
